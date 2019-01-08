@@ -16,64 +16,64 @@ def make_frames(num):
     of length 4. Both have points uniformally distributed around
     the average.
     """
-    def zip_arrays(d1,d2):
-        return np.array(list(zip(d1,d2)))
+    def zip_arrays(d1, d2):
+        return np.array(list(zip(d1, d2)))
 
     def make_squares(num, l):
-        left_right, top_bottom = make_barriers(num,l), make_barriers(num,l)
+        left_right, top_bottom = make_barriers(num, l), make_barriers(num, l)
         top_bottom[:,[0,1]] = top_bottom[:,[1,0]] 
         square = np.concatenate((left_right, top_bottom))
         return square
 
     def make_barriers(num, l):
-        dist = 0.1*l
-        left = np.random.uniform((-l-dist),(-l+dist),num)
-        right = np.random.uniform((l-dist),(l+dist),num)
-        left_barrier = np.random.uniform(-l,l,num)
-        right_barrier = np.random.uniform(-l,l,num)
-        L = zip_arrays(left,left_barrier)
-        R = zip_arrays(right,right_barrier)
-        barriers = np.vstack((L,R))
+        dist = 0.1 * l
+        left = np.random.uniform((-l - dist), (-l + dist), num)
+        right = np.random.uniform((l - dist), (l + dist), num)
+        left_barrier = np.random.uniform(-l, l, num)
+        right_barrier = np.random.uniform(-l, l, num)
+        L = zip_arrays(left, left_barrier)
+        R = zip_arrays(right, right_barrier)
+        barriers = np.vstack((L, R))
         return barriers
     
     outer = make_squares(num, l=2)
     inner = make_squares(num, l=1)
-    frames = np.concatenate((outer,inner))
+    frames = np.concatenate((outer, inner))
     
-    half = int((len(frames)/2))
-    target = np.concatenate((np.zeros(half),np.ones(half)))
+    half = int((len(frames) / 2))
+    target = np.concatenate((np.zeros(half), np.ones(half)))
     
-    X,y = shuffle(frames, target, random_state=1337)
-    return X,y
+    X, y = shuffle(frames, target, random_state=1337)
+    return X, y
 
 
-def make_omega(n_episodes,p,q,r,scale,loc=0):
+def make_omega(n_episodes, p, q, r, scale, loc=0):
     """
     encodes the input vector into q gate parameters
     """
 
-    def create_selection_matrix(p,q,r):
+    def create_selection_matrix(p, q, r):
         """
         Generates a matrix of 0s and 1s to zero out `r` values per matrix
         """
-        matrix_size = p*q
+        matrix_size = p * q
         m = np.zeros(matrix_size)
         for i in range(r): m[i] = 1
         np.random.shuffle(m)
-        selection_matrix = m.reshape(q,p)
+        selection_matrix = m.reshape(q, p)
         return selection_matrix
 
-    norm_dist = np.random.normal(loc, scale, size=(n_episodes,q,p))
-    selection_matrix = np.array([create_selection_matrix(p,q,r) for x in range(n_episodes)])
+    norm_dist = np.random.normal(loc, scale, size=(n_episodes, q, p))
+    selection_matrix = np.array([create_selection_matrix(p, q, r) for x in range(n_episodes)])
     omega = norm_dist * selection_matrix # matrix chooses which values to keep
     return omega
 
 
-def get_beta(n_episodes,q):
+def get_beta(n_episodes, q):
     """
     q-dimensional bias vector
     """
-    return np.random.uniform(low=0,high=(2*np.pi),size=(n_episodes,q))
+    return np.random.uniform(low=0, high=(2 * np.pi), size=(n_episodes, q))
 
 
 def get_theta(omega, u, beta, n_episodes):
@@ -88,9 +88,9 @@ def get_theta(omega, u, beta, n_episodes):
 
 
 def make_qc(q, noisy=False):
-    q_str = str(q)+'q'
+    q_str = str(q) + 'q'
     qvm = '-qvm'
-    name = q_str+qvm if not noisy else q_str+'-noisy'+qvm
+    name = q_str + qvm if not noisy else q_str + '-noisy' + qvm
     print("name of qc: ", name)
     qc = get_qc(name)
     return qc
@@ -111,24 +111,24 @@ def ansatz(qc):
     var = 'theta'
 
     ro = program.declare('ro', memory_type='BIT', memory_size=n_qubits)
-    thetas = {var+str(qubit):program.declare(var+str(qubit), memory_type = 'REAL') for qubit in qubits}
+    thetas = {var + str(qubit): program.declare(var + str(qubit), memory_type = 'REAL') for qubit in qubits}
 
     sq = int(np.sqrt(n_qubits))
-    lim = n_qubits-sq-1 
+    lim = n_qubits - sq - 1 
     
-    for m in qubits: program += (RX(thetas[var+str(m)],m))
+    for m in qubits: program += RX(thetas[var + str(m)], m)
     for m in qubits:
-        m_1 = m+1
-        m_sq = m+sq
-        skip = (m_1)%sq
+        m_1 = m + 1
+        m_sq = m + sq
+        skip = (m_1) % sq
         
         if m_1 < n_qubits:
-            if (m_sq >= n_qubits): program += CNOT(m,m_1)
-            else: program += CNOT(m,m_sq)
+            if (m_sq >= n_qubits): program += CNOT(m, m_1)
+            else: program += CNOT(m, m_sq)
     
-        if (m < lim) and (skip != 0): program += CNOT(m,m_1)
+        if (m < lim) and (skip != 0): program += CNOT(m, m_1)
 
-    for m in qubits: program += MEASURE(m,ro[m])
+    for m in qubits: program += MEASURE(m, ro[m])
 
     print("program instructions from pyquil:\n")
     for instruction in program.instructions:
@@ -138,7 +138,7 @@ def ansatz(qc):
 
 
 def qks_run(qc, executable, theta):
-    theta_map = {'theta%s'%pos:[theta[pos]] for pos in range(len(theta))}
+    theta_map = {'theta%s'%pos: [theta[pos]] for pos in range(len(theta))}
     bitstrings = qc.run(executable, memory_map=theta_map)
     avg_measurements = bitstrings.mean(axis=0)
     return avg_measurements
@@ -148,8 +148,8 @@ def logistic_regression(X_train, y_train, X_test, y_test):
     lr = LogisticRegression(solver='lbfgs')
     lr.fit(X_train, y_train)
 
-    train_acc = lr.score(X_train,y_train)
-    test_acc = lr.score(X_test,y_test)
+    train_acc = lr.score(X_train, y_train)
+    test_acc = lr.score(X_test, y_test)
 
     print(
         "accuracy\n----- \n training: {}\n test:     {}"
@@ -163,7 +163,7 @@ def logistic_regression(X_train, y_train, X_test, y_test):
 
 
 def make_plot(data, target, name, title):
-    plt.figure(figsize=(5,5))
+    plt.figure(figsize=(5, 5))
     plt.title(title)
     plt.scatter(data[:,0], data[:,1], s=5, c=target)
     plt.savefig(name)
@@ -182,23 +182,23 @@ def main():
     test_size = 50     # 50 is default to get the size of the dataset in the paper
     
     img_path = 'figs/'
-    num_cols = n_episodes*q # number of columns after QKS transformation
+    num_cols = n_episodes * q # number of columns after QKS transformation
 
     # make picture frames dataset
     train, y_train = make_frames(train_size)
     test, y_test = make_frames(test_size)
 
     p = train.shape[-1] # dimension of input vector
-    r = 1 if p/q < 1 else int(p/q)  # number of elements that are non-zero s.t. r<=p
+    r = 1 if p / q < 1 else int(p / q)  # number of elements that are non-zero s.t. r<=p
 
-    beta  = get_beta(n_episodes,q)
-    omega = make_omega(n_episodes,p,q,r,sigma2,0)
+    beta  = get_beta(n_episodes, q)
+    omega = make_omega(n_episodes, p, q, r, sigma2, 0)
 
     train_theta = get_theta(omega, train, beta, n_episodes)
     test_theta = get_theta(omega, test, beta, n_episodes)
 
     # make QC, circuits, run and measure
-    qc = make_qc(q,noisy)
+    qc = make_qc(q, noisy)
     program = ansatz(qc)
     program.wrap_in_numshots_loop(shots=n_trials)
     executable = qc.compile(program)
@@ -213,10 +213,10 @@ def main():
     train_preds, test_preds = logistic_regression(X_train, y_train, X_test, y_test)
 
     if plot is True:
-        make_plot(train, y_train, img_path+'training_dataset', 'Training Set')
-        make_plot(test, y_test, img_path+'test_dataset', 'Test Set')
-        make_plot(train, train_preds, img_path+'results_experiment_train', 'Experiment Results - Training Dataset')
-        make_plot(test, test_preds, img_path+'results_experiment_test', 'Experiment Results - Test Dataset') 
+        make_plot(train, y_train, img_path + 'training_dataset', 'Training Set')
+        make_plot(test, y_test, img_path + 'test_dataset', 'Test Set')
+        make_plot(train, train_preds, img_path + 'results_experiment_train', 'Experiment Results - Training Dataset')
+        make_plot(test, test_preds, img_path + 'results_experiment_test', 'Experiment Results - Test Dataset') 
 
 
 if __name__ == "__main__":
