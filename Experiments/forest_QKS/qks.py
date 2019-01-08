@@ -10,8 +10,9 @@ from pyquil.gates import RX, CNOT, MEASURE
 
 
 def make_frames(num):
-    """
-    The picture frames dataset contains a smaller inner square
+    """Generates picture frames dataset.
+    
+    The dataset contains a smaller inner square
     with sides of length 2 and a larger outer square with sides
     of length 4. Both have points uniformally distributed around
     the average.
@@ -48,14 +49,19 @@ def make_frames(num):
 
 
 def make_omega(n_episodes, p, q, r, scale, loc=0):
-    """
-    encodes the input vector into q gate parameters
+    """A (q x p) dimensional matrix that is used to encode the input vector into q gate parameters.
+    
+    n_episodes: number of episodes the dataset is iterated over
+    q: number of qubits to use
+    p: dimension of input vector
+    r: number of elements that are non-zero s.t. r <= p
+    scale: standard deviation (spread) of the normal distribution
+    loc: mean of the normal distribution
     """
 
     def create_selection_matrix(p, q, r):
-        """
-        Generates a matrix of 0s and 1s to zero out `r` values per matrix
-        """
+        """Generates a matrix of 0s and 1s to zero out `r` values per matrix"""
+        
         matrix_size = p * q
         m = np.zeros(matrix_size)
         for i in range(r):
@@ -64,22 +70,28 @@ def make_omega(n_episodes, p, q, r, scale, loc=0):
         selection_matrix = m.reshape(q, p)
         return selection_matrix
 
-    norm_dist = np.random.normal(loc, scale, size=(n_episodes, q, p))
+    normal_dist = np.random.normal(loc, scale, size=(n_episodes, q, p))
     selection_matrix = np.array([create_selection_matrix(p, q, r) for x in range(n_episodes)])
-    omega = norm_dist * selection_matrix # matrix chooses which values to keep
+    omega = normal_dist * selection_matrix # matrix chooses which values to keep
     return omega
 
 
 def get_beta(n_episodes, q):
-    """
-    q-dimensional bias vector
+    """random q-dimensional bias vector
+    
+    n_episodes: number of episodes the dataset is iterated over
+    q: number of qubits to use
     """
     return np.random.uniform(low=0, high=(2 * np.pi), size=(n_episodes, q))
 
 
 def get_theta(omega, u, beta, n_episodes):
-    """
-    random parameters
+    """A linear transformation to get our set of random parameters to feed into the quantum circuit
+    
+    omega: a (q x p) dimensional matrix that is used to encode the input vector into q gate parameters
+    u: p-dimensional input vector from the dataset 
+    beta: random q-dimensional bias vector
+    n_episodes: number of episodes the dataset is iterated over
     """
     theta = [omega[e].dot(u[i].T) + beta[e]
              for i in range(u.shape[0]) 
@@ -98,12 +110,12 @@ def make_qc(q, noisy=False):
 
 
 def ansatz(qc):
-    """
-    This function creates the quantum circuit and performs the measurements.
+    """Creates the quantum circuit and performs the measurements.
+    
     It mimics the circuits from the appendix of the paper, with the exception of
     the ordering of the CNOT gates (before and after compilation they still do not match).
-    This is probably best just left up to the compiler.
-
+    This is probably best just left up to the compiler. 
+    
     For ease of reading the printed operations, the qubits are looped over several times.
     """    
     program = Program()
