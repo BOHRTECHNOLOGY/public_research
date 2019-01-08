@@ -14,7 +14,7 @@ picture frames             |  picture frames
 ![training set](https://github.com/zackgow/public_research/raw/quantum_kitchen_sinks/Experiments/forest_QKS/figs/training_dataset.png) |  ![test set](https://github.com/zackgow/public_research/raw/quantum_kitchen_sinks/Experiments/forest_QKS/figs/test_dataset.png)
 
 ## Results
-Using the parameters below, we were able to achieve an accuracy of **0.995%** on the training set and **0.9975%** on the test set using logistic regression after obtaining the feature vector from the Quantum Kitchen Sinks method. 
+Using the parameters below, we were able to achieve an accuracy of **99.5%** on the training set and **99.75%** on the test set using logistic regression after obtaining the feature vector from the Quantum Kitchen Sinks method. 
 
     Parameters
     ----------
