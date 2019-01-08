@@ -58,7 +58,8 @@ def make_omega(n_episodes, p, q, r, scale, loc=0):
         """
         matrix_size = p * q
         m = np.zeros(matrix_size)
-        for i in range(r): m[i] = 1
+        for i in range(r):
+            m[i] = 1
         np.random.shuffle(m)
         selection_matrix = m.reshape(q, p)
         return selection_matrix
@@ -116,7 +117,9 @@ def ansatz(qc):
     sq = int(np.sqrt(n_qubits))
     lim = n_qubits - sq - 1 
     
-    for m in qubits: program += RX(thetas[var + str(m)], m)
+    for m in qubits:
+        program += RX(thetas[var + str(m)], m)
+        
     for m in qubits:
         m_1 = m + 1
         m_sq = m + sq
@@ -128,7 +131,8 @@ def ansatz(qc):
     
         if (m < lim) and (skip != 0): program += CNOT(m, m_1)
 
-    for m in qubits: program += MEASURE(m, ro[m])
+    for m in qubits:
+        program += MEASURE(m, ro[m])
 
     print("program instructions from pyquil:\n")
     for instruction in program.instructions:
