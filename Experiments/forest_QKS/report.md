@@ -31,8 +31,8 @@ Using the parameters below, we were able to achieve an accuracy of **99.5%** on 
      
     Accuracy
     --------
-    training set:  0.995%
-    test set:      0.9975%
+    training set:  99.5%
+    test set:      99.75%
 
 picture frames             |  picture frames
 :-------------------------:|:-------------------------:
