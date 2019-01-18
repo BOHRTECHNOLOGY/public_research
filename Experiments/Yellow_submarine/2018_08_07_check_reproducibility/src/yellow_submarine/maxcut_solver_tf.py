@@ -24,21 +24,22 @@ class MaxCutSolver():
         self.interferometer_matrix = matrices[1]
         self.n_qumodes = self.adj_matrix.shape[0]
         self.cost_array = self.prepare_cost_array()
-        self.learner = None
+
+        self.learner_params['circuit'] = self.create_circuit_evaluator
+        self.learner = CircuitLearner(hyperparams=self.learner_params, model_dir=training_params['model_dir'])
+        self.final_params = None
+
         if log is None:
             self.log = {}
         else:
             self.log = log
 
-    def train_and_evaluate_circuit(self):
-        self.learner_params['circuit'] = self.create_circuit_evaluator
-        self.learner = CircuitLearner(hyperparams=self.learner_params)
+    def train_and_evaluate_circuit(self, verbose=False):
         self.learner.train_circuit(steps=self.training_params['steps'], tensors_to_log=self.log)
-
         final_params = self.learner.get_circuit_parameters()
         
-        for name, value in final_params.items():
-            if "Variable" not in name:
+        if verbose:
+            for name, value in final_params.items():
                 print("Parameter {} has the final value {}.".format(name, value))
 
         for gate in self.gates_structure:
@@ -49,6 +50,7 @@ class MaxCutSolver():
                     gate[2]['constant'] = final_value
                     break
 
+        self.final_params = final_params
         all_results = []
         circuit_output = self.get_circuit_output()
         cost_tensor = self.loss_function(circuit_output)
@@ -58,7 +60,9 @@ class MaxCutSolver():
             circuit_output = sess.run(circuit_output)
             cost_value = sess.run(cost_tensor)
 
-        print("Total cost:", cost_value)
+        if verbose:
+            print("Total cost:", cost_value)
+        return cost_value
  
     def create_circuit_evaluator(self):
         return self.get_circuit_output()
@@ -113,7 +117,8 @@ class MaxCutSolver():
         state = eng.run('tf', cutoff_dim=self.training_params['cutoff_dim'], eval=False)
         all_probs = state.all_fock_probs()
         circuit_output = all_probs
-        trace = tf.identity(state.trace(), name='trace')
+        trace = tf.identity(tf.abs(state.trace()), name='trace')
+        tf.summary.scalar(name='trace', tensor=trace)
         
         if test:
             init = tf.global_variables_initializer()
