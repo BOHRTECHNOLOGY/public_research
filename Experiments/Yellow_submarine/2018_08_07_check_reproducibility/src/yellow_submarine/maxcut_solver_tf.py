@@ -24,21 +24,22 @@ class MaxCutSolver():
         self.interferometer_matrix = matrices[1]
         self.n_qumodes = self.adj_matrix.shape[0]
         self.cost_array = self.prepare_cost_array()
-        self.learner = None
+
+        self.learner_params['circuit'] = self.create_circuit_evaluator
+        self.learner = CircuitLearner(hyperparams=self.learner_params, model_dir=training_params['model_dir'])
+        self.final_params = None
+
         if log is None:
             self.log = {}
         else:
             self.log = log
 
-    def train_and_evaluate_circuit(self):
-        self.learner_params['circuit'] = self.create_circuit_evaluator
-        self.learner = CircuitLearner(hyperparams=self.learner_params)
+    def train_and_evaluate_circuit(self, verbose=False):
         self.learner.train_circuit(steps=self.training_params['steps'], tensors_to_log=self.log)
-
         final_params = self.learner.get_circuit_parameters()
         
-        for name, value in final_params.items():
-            if "Variable" not in name:
+        if verbose:
+            for name, value in final_params.items():
                 print("Parameter {} has the final value {}.".format(name, value))
 
         for gate in self.gates_structure:
@@ -49,6 +50,7 @@ class MaxCutSolver():
                     gate[2]['constant'] = final_value
                     break
 
+        self.final_params = final_params
         all_results = []
         circuit_output = self.get_circuit_output()
         cost_tensor = self.loss_function(circuit_output)
@@ -58,7 +60,9 @@ class MaxCutSolver():
             circuit_output = sess.run(circuit_output)
             cost_value = sess.run(cost_tensor)
 
-        print("Total cost:", cost_value)
+        if verbose:
+            print("Total cost:", cost_value)
+        return cost_value, circuit_output
  
     def create_circuit_evaluator(self):
         return self.get_circuit_output()
@@ -70,9 +74,9 @@ class MaxCutSolver():
         kgates = []
         for gate_structure in self.gates_structure:
             if gate_structure[0] is Sgate:
-                sgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])]))
+                sgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])]))
             if gate_structure[0] is Dgate:
-                dgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])]))
+                dgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])]))
             if gate_structure[0] is Kgate:
                 kgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])]))
 
@@ -88,12 +92,12 @@ class MaxCutSolver():
             Interferometer(U) | q
 
             for gate in sgates:
-                gate.gate(gate.params[0]) | gate.qumodes
+                gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
             Interferometer(self.interferometer_matrix) | q
 
             for gate in dgates:
-                gate.gate(gate.params[0]) | gate.qumodes
+                gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
             Interferometer(self.interferometer_matrix) | q
 
@@ -113,7 +117,8 @@ class MaxCutSolver():
         state = eng.run('tf', cutoff_dim=self.training_params['cutoff_dim'], eval=False)
         all_probs = state.all_fock_probs()
         circuit_output = all_probs
-        trace = tf.identity(state.trace(), name='trace')
+        trace = tf.identity(tf.abs(state.trace()), name='trace')
+        tf.summary.scalar(name='trace', tensor=trace)
         
         if test:
             init = tf.global_variables_initializer()
@@ -124,10 +129,17 @@ class MaxCutSolver():
 
         return circuit_output
 
-    def loss_function(self, circuit_output):
-        cost_tensor = tf.constant(self.cost_array, dtype=tf.float32, name='cost_tensor')
+    def loss_function(self, circuit_output, use_reduced_probs=True):
+        if use_reduced_probs:
+            cost_array = self.cost_array[[slice(2)]*self.n_qumodes]
+            cost_tensor = tf.constant(cost_array, dtype=tf.float32, name='cost_tensor')
+            circuit_output = tf.slice(circuit_output, [0]*self.n_qumodes, [2]*self.n_qumodes)
+        else:
+            cost_tensor = tf.constant(self.cost_array, dtype=tf.float32, name='cost_tensor')
         weighted_cost_tensor = tf.multiply(cost_tensor, circuit_output)
+        total_probability = tf.reduce_sum(circuit_output)
         result = tf.reduce_sum(weighted_cost_tensor)
+        result = tf.divide(result, total_probability)
         result = tf.multiply(result, tf.constant(-1.0))
         return result
 
