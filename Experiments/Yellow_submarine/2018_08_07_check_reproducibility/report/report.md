@@ -167,3 +167,4 @@ Based on the results we decided to make the following decisions:
 
 The results obtained are interesting and allow us to state some new questions: 
 - Which gate layers are really important for the training process
+- Does including phase yields any improvement in the training process
