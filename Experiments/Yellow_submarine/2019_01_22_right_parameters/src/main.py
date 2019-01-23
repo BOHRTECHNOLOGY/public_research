@@ -32,7 +32,7 @@ def run_single_test(learner_params, training_params, matrices, gates_structure):
     return final_cost, all_probs
 
 
-def main(run_id=0):
+def main(run_id=0, learning_rate=0.1, regularization=1e-3):
     c = 3
     A = np.array([[c, 1, 1, 0],
         [1, c, 1, 1],
@@ -51,15 +51,19 @@ def main(run_id=0):
 
     learner_params = {
         'task': 'optimization',
-        'regularization_strength': 2e-3,
+        'regularization_strength': regularization,
         'optimizer': 'SGD',
-        'init_learning_rate': 0.1,
-        'log_every': 1,
+        'init_learning_rate': learning_rate,
+        'log_every': 20,
+        'plot_every': 20,
         'print_log': False
         }
 
+
+    steps = 400
+
     training_params = {
-        'steps': 200,
+        'steps': steps,
         'cutoff_dim': 17
         }
 
@@ -88,8 +92,7 @@ def main(run_id=0):
     gates_structure.append([Kgate, 3, {"constant": np.random.random() - 0.5, "name": 'kerr_3', 'regularize': True, 'monitor': True}])
     
 
-    print("Starting", run_id)
-    model_dir = "logsAuto_phase_" + str(run_id)
+    model_dir = "logsAuto_lr_" + str(learning_rate) + "_" + str(regularization) + "_" + str(run_id)  
     training_params['model_dir'] = model_dir
     cost, all_probs = run_single_test(learner_params, training_params, matrices, gates_structure)
     total_prob = np.sum(all_probs)
@@ -109,4 +112,4 @@ def main(run_id=0):
         print(el)
 
 if __name__ == '__main__':
-    main(int(sys.argv[1]))
+    main(int(sys.argv[1]), float(sys.argv[2]), float(sys.argv[3]))
