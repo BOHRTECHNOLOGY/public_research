@@ -31,6 +31,18 @@ def run_single_test(learner_params, training_params, matrices, gates_structure):
     final_cost, all_probs = max_cut_solver.train_and_evaluate_circuit(verbose=False)
     return final_cost, all_probs
 
+def assess_cost_based_on_output(outputs, A):
+    cost = 0
+    for encoding in outputs:
+        cost += calculate_cost_for_encoding(A, encoding) 
+    return cost / len(outputs)
+
+def calculate_cost_for_encoding(A, encoding):
+    cost_value = 0
+    for i in range(len(encoding)):
+        for j in range(len(encoding)):
+            cost_value += 0.5 * A[i][j] * (encoding[i] - encoding[j])**2
+    return cost_value
 
 def main(run_id=0, learning_rate=0.1, regularization=1e-3):
     c = 3
@@ -54,13 +66,12 @@ def main(run_id=0, learning_rate=0.1, regularization=1e-3):
         'regularization_strength': regularization,
         'optimizer': 'SGD',
         'init_learning_rate': learning_rate,
-        'log_every': 20,
-        'plot_every': 20,
+        'log_every': 1,
         'print_log': False
         }
 
 
-    steps = 400
+    steps = 401
 
     training_params = {
         'steps': steps,
@@ -110,6 +121,9 @@ def main(run_id=0, learning_rate=0.1, regularization=1e-3):
     print("total prob:", total_prob)
     for el in output_counter.most_common()[:10]:
         print(el)
+    cost_from_output = assess_cost_based_on_output(circuit_outputs_clipped, A)
+    print("cost from output:", cost_from_output)
+
 
 if __name__ == '__main__':
     main(int(sys.argv[1]), float(sys.argv[2]), float(sys.argv[3]))

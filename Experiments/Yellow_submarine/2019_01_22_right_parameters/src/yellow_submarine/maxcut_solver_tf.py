@@ -51,15 +51,21 @@ class MaxCutSolver():
                     break
 
         self.final_params = final_params
-        all_results = []
         circuit_output = self.get_circuit_output()
         cost_tensor = self.loss_function(circuit_output)
         init = tf.global_variables_initializer()
+        
         with tf.Session() as sess:
             sess.run(init)
+            for variable in tf.all_variables():
+                variable_name = variable.name.split(':')[0]
+                if variable_name in final_params.keys():
+                    value = final_params[variable_name]
+                    sess.run(variable.assign(value))
             circuit_output = sess.run(circuit_output)
             cost_value = sess.run(cost_tensor)
-
+            a_variable = sess.run(tf.all_variables()[0])
+        
         if verbose:
             print("Total cost:", cost_value)
         return cost_value, circuit_output
@@ -129,17 +135,10 @@ class MaxCutSolver():
 
         return circuit_output
 
-    def loss_function(self, circuit_output, use_reduced_probs=True):
-        if use_reduced_probs:
-            cost_array = self.cost_array[[slice(2)]*self.n_qumodes]
-            cost_tensor = tf.constant(cost_array, dtype=tf.float32, name='cost_tensor')
-            circuit_output = tf.slice(circuit_output, [0]*self.n_qumodes, [2]*self.n_qumodes)
-        else:
-            cost_tensor = tf.constant(self.cost_array, dtype=tf.float32, name='cost_tensor')
+    def loss_function(self, circuit_output):
+        cost_tensor = tf.constant(self.cost_array, dtype=tf.float32, name='cost_tensor')
         weighted_cost_tensor = tf.multiply(cost_tensor, circuit_output)
-        total_probability = tf.reduce_sum(circuit_output)
         result = tf.reduce_sum(weighted_cost_tensor)
-        result = tf.divide(result, total_probability)
         result = tf.multiply(result, tf.constant(-1.0))
         return result
 
