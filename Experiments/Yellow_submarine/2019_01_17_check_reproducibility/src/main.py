@@ -34,10 +34,12 @@ def run_single_test(learner_params, training_params, matrices, gates_structure):
 
 def main(run_id=0):
     c = 3
-    A = np.array([[c, 1, 1, 0],
+    A = np.array([
+        [c, 1, 1, 0],
         [1, c, 1, 1],
         [1, 1, c, 1],
-        [0, 1, 1, c]])
+        [0, 1, 1, c],
+    ])
 
     interferometer_matrix = \
         np.array(
@@ -53,13 +55,13 @@ def main(run_id=0):
         'task': 'optimization',
         'regularization_strength': 2e-3,
         'optimizer': 'SGD',
-        'init_learning_rate': 0.1,
+        'init_learning_rate': 0.05,
         'log_every': 1,
         'print_log': False
         }
 
     training_params = {
-        'steps': 200,
+        'steps': 400,
         'cutoff_dim': 17
         }
 
