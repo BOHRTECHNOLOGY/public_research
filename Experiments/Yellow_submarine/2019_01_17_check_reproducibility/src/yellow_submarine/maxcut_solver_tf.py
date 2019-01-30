@@ -68,7 +68,7 @@ class MaxCutSolver():
         return self.get_circuit_output()
 
     def build_circuit(self):
-        params_counter = 0
+        # params_counter = 0
         sgates = []
         dgates = []
         kgates = []
@@ -86,7 +86,7 @@ class MaxCutSolver():
         initial_squeezings = np.tanh(rl)
 
         with eng:
-            for i ,squeeze_value in enumerate(initial_squeezings):
+            for i, squeeze_value in enumerate(initial_squeezings):
                 Sgate(squeeze_value) | i
 
             Interferometer(U) | q
@@ -131,7 +131,7 @@ class MaxCutSolver():
 
     def loss_function(self, circuit_output, use_reduced_probs=True):
         if use_reduced_probs:
-            cost_array = self.cost_array[[slice(2)]*self.n_qumodes]
+            cost_array = self.cost_array[(slice(2),)*self.n_qumodes]
             cost_tensor = tf.constant(cost_array, dtype=tf.float32, name='cost_tensor')
             circuit_output = tf.slice(circuit_output, [0]*self.n_qumodes, [2]*self.n_qumodes)
         else:
