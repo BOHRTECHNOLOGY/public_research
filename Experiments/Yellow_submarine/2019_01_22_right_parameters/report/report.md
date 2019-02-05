@@ -1,4 +1,4 @@
-# Yellow Submarine - reproducibility
+# Yellow Submarine - finding parameters
 
 ## Overview
 
