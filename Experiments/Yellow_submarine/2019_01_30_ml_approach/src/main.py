@@ -1,6 +1,6 @@
-from yellow_submarine.maxcut_solver_tf import MaxCutSolver, ParametrizedGate
+from yellow_submarine.maxcut_solver_ml import MaxCutSolver, ParametrizedGate
+from yellow_submarine.maxcut_solver_ml import assess_all_solutions_clasically
 from strawberryfields.ops import *
-import tensorflow as tf
 from scipy.stats import rv_discrete
 import pdb
 from collections import Counter
@@ -38,30 +38,61 @@ def calculate_cost_for_encoding(A, encoding):
     return cost_value
 
 
-def run_single_test(learner_params, training_params, matrices, gates_structure):
+def run_single_test(learner_params, training_params, adj_matrices, gates_structure):
     log = {'Trace': 'trace'}
-    max_cut_solver = MaxCutSolver(learner_params, training_params, matrices, gates_structure, log=log)
+    max_cut_solver = MaxCutSolver(learner_params, training_params, adj_matrices, gates_structure, log=log)
 
-    final_cost, all_probs = max_cut_solver.train_and_evaluate_circuit(verbose=False)
-    return final_cost, all_probs
+    final_costs, all_probs_list = max_cut_solver.train_and_evaluate_circuit(verbose=False)
+
+    return final_costs, all_probs_list
 
 
-def main(run_id=0, use_s=1, use_d=1, use_ng=1):
+def main(run_id=0, use_ng=1):
     c = 3
-    A = np.array([[c, 1, 1, 0],
+    # Initial set of matrices used for training
+    # A_0 = np.array([[c, 1, 1, 1],
+    #     [1, c, 1, 1],
+    #     [1, 1, c, 1],
+    #     [1, 1, 1, c]])
+
+    # A_1 = np.array([[c, 1, 1, 0],
+    #     [1, c, 1, 1],
+    #     [1, 1, c, 1],
+    #     [0, 1, 1, c]])
+
+    # A_2 = np.array([[c, 0, 1, 0],
+    #     [0, c, 1, 1],
+    #     [1, 1, c, 1],
+    #     [0, 1, 1, c]])
+
+    # A_3 = np.array([[c, 1, 0, 0],
+    #     [1, c, 1, 0],
+    #     [0, 1, c, 1],
+    #     [0, 0, 1, c]])
+
+    A_0 = np.array([[c, 1, 1, 1],
+        [1, c, 0, 0],
+        [1, 0, c, 0],
+        [1, 0, 0, c]])
+
+    A_1 = np.array([[c, 1, 0, 0],
         [1, c, 1, 1],
+        [0, 1, c, 0],
+        [0, 1, 0, c]])
+
+    A_2 = np.array([[c, 0, 1, 0],
+        [0, c, 1, 0],
         [1, 1, c, 1],
-        [0, 1, 1, c]])
+        [0, 0, 1, c]])
 
-    interferometer_matrix = \
-        np.array(
-            [[1, -1, 1, -1],
-            [1, 1, 1, 1],
-            [-1, -1, 1, 1],
-            [1, -1, -1, 1]
-            ]) / 2
+    A_3 = np.array([[c, 0, 0, 1],
+        [0, c, 0, 1],
+        [0, 0, c, 1],
+        [1, 1, 1, c]])
 
-    matrices = [A, interferometer_matrix]
+
+
+    adj_matrices = [A_0, A_1, A_2, A_3]
 
     learner_params = {
         'task': 'optimization',
@@ -78,58 +109,60 @@ def main(run_id=0, use_s=1, use_d=1, use_ng=1):
         }
 
     gates_structure = []
-    if use_s==1:
-        gates_structure.append([Sgate, 0, {"constant": np.random.random() - 0.5, "name": 's_magnitude_0', 'regularize': True, 'monitor': True},
-            {"constant": np.random.random()*2*np.pi, "name": 's_phase_0', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Sgate, 1, {"constant": np.random.random() - 0.5, "name": 's_magnitude_1', 'regularize': True, 'monitor': True},
-            {"constant": np.random.random()*2*np.pi, "name": 's_phase_1', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Sgate, 2, {"constant": np.random.random() - 0.5, "name": 's_magnitude_2', 'regularize': True, 'monitor': True},
-            {"constant": np.random.random()*2*np.pi, "name": 's_phase_2', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Sgate, 3, {"constant": np.random.random() - 0.5, "name": 's_magnitude_3', 'regularize': True, 'monitor': True},
-            {"constant": np.random.random()*2*np.pi, "name": 's_phase_3', 'regularize': True, 'monitor': True}])
-    if use_d==1:
-        gates_structure.append([Dgate, 0, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_0', 'regularize': True, 'monitor': True},
-            {"constant": np.random.random()*2*np.pi, "name": 'd_phase_0', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Dgate, 1, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_1', 'regularize': True, 'monitor': True},
-            {"constant": np.random.random()*2*np.pi, "name": 'd_phase_1', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Dgate, 2, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_2', 'regularize': True, 'monitor': True},
-            {"constant": np.random.random()*2*np.pi, "name": 'd_phase_2', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Dgate, 3, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_3', 'regularize': True, 'monitor': True},
-            {"constant": np.random.random()*2*np.pi, "name": 'd_phase_3', 'regularize': True, 'monitor': True}])
+    gates_structure.append([Sgate, 0, {"constant": np.random.random() - 0.5, "name": 's_magnitude_0', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_0', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Sgate, 1, {"constant": np.random.random() - 0.5, "name": 's_magnitude_1', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_1', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Sgate, 2, {"constant": np.random.random() - 0.5, "name": 's_magnitude_2', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_2', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Sgate, 3, {"constant": np.random.random() - 0.5, "name": 's_magnitude_3', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_3', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Dgate, 0, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_0', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_0', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Dgate, 1, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_1', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_1', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Dgate, 2, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_2', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_2', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Dgate, 3, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_3', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_3', 'regularize': True, 'monitor': False}])
     
-    if use_ng==1:
-        gates_structure.append([Kgate, 0, {"constant": np.random.random() - 0.5, "name": 'kerr_0', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Kgate, 1, {"constant": np.random.random() - 0.5, "name": 'kerr_1', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Kgate, 2, {"constant": np.random.random() - 0.5, "name": 'kerr_2', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Kgate, 3, {"constant": np.random.random() - 0.5, "name": 'kerr_3', 'regularize': True, 'monitor': True}])
-    elif use_ng==2:
-        gates_structure.append([Vgate, 0, {"constant": np.random.random() - 0.5, "name": 'cubic_0', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Vgate, 1, {"constant": np.random.random() - 0.5, "name": 'cubic_1', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Vgate, 2, {"constant": np.random.random() - 0.5, "name": 'cubic_2', 'regularize': True, 'monitor': True}])
-        gates_structure.append([Vgate, 3, {"constant": np.random.random() - 0.5, "name": 'cubic_3', 'regularize': True, 'monitor': True}])
+    if use_ng == 1:
+        gates_structure.append([Kgate, 0, {"constant": np.random.random() - 0.5, "name": 'kerr_0', 'regularize': True, 'monitor': False}])
+        gates_structure.append([Kgate, 1, {"constant": np.random.random() - 0.5, "name": 'kerr_1', 'regularize': True, 'monitor': False}])
+        gates_structure.append([Kgate, 2, {"constant": np.random.random() - 0.5, "name": 'kerr_2', 'regularize': True, 'monitor': False}])
+        gates_structure.append([Kgate, 3, {"constant": np.random.random() - 0.5, "name": 'kerr_3', 'regularize': True, 'monitor': False}])
+    elif use_ng == 2:
+        gates_structure.append([Vgate, 0, {"constant": np.random.random() - 0.5, "name": 'cubic_0', 'regularize': True, 'monitor': False}])
+        gates_structure.append([Vgate, 1, {"constant": np.random.random() - 0.5, "name": 'cubic_1', 'regularize': True, 'monitor': False}])
+        gates_structure.append([Vgate, 2, {"constant": np.random.random() - 0.5, "name": 'cubic_2', 'regularize': True, 'monitor': False}])
+        gates_structure.append([Vgate, 3, {"constant": np.random.random() - 0.5, "name": 'cubic_3', 'regularize': True, 'monitor': False}])
 
 
-    print("Starting", use_s, use_d, use_ng, run_id)
-    model_dir = "logsAuto2_s_{0}_d_{1}_ng_{2}_run_{3}".format(use_s, use_d, use_ng, run_id)
+    print("Starting", run_id, 'ng', use_ng)
+    model_dir = "logsAuto_run_{0}_ng_{1}".format(run_id, use_ng)
     training_params['model_dir'] = model_dir
-    cost, all_probs = run_single_test(learner_params, training_params, matrices, gates_structure)
-    total_prob = np.sum(all_probs)
-    all_probs = all_probs / total_prob
-    cutoff_dim = training_params['cutoff_dim']
-    values_flat = [list_to_number(i, cutoff_dim) for i in np.ndindex(all_probs.shape)]
-    indices_array = np.reshape(values_flat, all_probs.shape)
-    final_distribution = rv_discrete(values=(indices_array, all_probs))
-    circuit_outputs_raw = final_distribution.rvs(size=1000)
-    circuit_outputs_num = [number_to_base(i, cutoff_dim, len(A)) for i in circuit_outputs_raw]
-    circuit_outputs_clipped = [np.clip(i, 0, 1) for i in circuit_outputs_num]
-    circuit_outputs_str = [str(i) for i in circuit_outputs_clipped]
-    output_counter = Counter(circuit_outputs_str)
-    print("cost:", cost)
-    print("total prob:", total_prob)
-    for el in output_counter.most_common()[:10]:
-        print(el)
+    final_costs, all_probs_list = run_single_test(learner_params, training_params, adj_matrices, gates_structure)
 
-    print("cost from output:", assess_cost_based_on_output(circuit_outputs_clipped, A))
+    for cost, all_probs, A in zip(final_costs, all_probs_list, adj_matrices):
+        total_prob = np.sum(all_probs)
+        all_probs = all_probs / total_prob
+        cutoff_dim = training_params['cutoff_dim']
+        values_flat = [list_to_number(i, cutoff_dim) for i in np.ndindex(all_probs.shape)]
+        indices_array = np.reshape(values_flat, all_probs.shape)
+        final_distribution = rv_discrete(values=(indices_array, all_probs))
+        circuit_outputs_raw = final_distribution.rvs(size=1000)
+        circuit_outputs_num = [number_to_base(i, cutoff_dim, len(A)) for i in circuit_outputs_raw]
+        circuit_outputs_clipped = [np.clip(i, 0, 1) for i in circuit_outputs_num]
+        circuit_outputs_str = [str(i) for i in circuit_outputs_clipped]
+        output_counter = Counter(circuit_outputs_str)
+        print("cost:", cost)
+        print("total prob:", total_prob)
+        for el in output_counter.most_common()[:10]:
+            encoding = np.fromstring(el[0][1:-1], sep=' ').astype(int)
+            print(el, calculate_cost_for_encoding(A, encoding))
+
+        print("cost from output:", assess_cost_based_on_output(circuit_outputs_clipped, A))
+    print(assess_all_solutions_clasically(A))
 
 if __name__ == '__main__':
-    main(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
+    main(int(sys.argv[1]), int(sys.argv[2]))
