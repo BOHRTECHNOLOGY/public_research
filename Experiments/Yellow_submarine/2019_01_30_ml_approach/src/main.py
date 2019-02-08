@@ -109,33 +109,61 @@ def main(run_id=0, use_ng=1):
         }
 
     gates_structure = []
-    gates_structure.append([Sgate, 0, {"constant": np.random.random() - 0.5, "name": 's_magnitude_0', 'regularize': True, 'monitor': False},
-        {"constant": np.random.random()*2*np.pi, "name": 's_phase_0', 'regularize': True, 'monitor': False}])
-    gates_structure.append([Sgate, 1, {"constant": np.random.random() - 0.5, "name": 's_magnitude_1', 'regularize': True, 'monitor': False},
-        {"constant": np.random.random()*2*np.pi, "name": 's_phase_1', 'regularize': True, 'monitor': False}])
-    gates_structure.append([Sgate, 2, {"constant": np.random.random() - 0.5, "name": 's_magnitude_2', 'regularize': True, 'monitor': False},
-        {"constant": np.random.random()*2*np.pi, "name": 's_phase_2', 'regularize': True, 'monitor': False}])
-    gates_structure.append([Sgate, 3, {"constant": np.random.random() - 0.5, "name": 's_magnitude_3', 'regularize': True, 'monitor': False},
-        {"constant": np.random.random()*2*np.pi, "name": 's_phase_3', 'regularize': True, 'monitor': False}])
-    gates_structure.append([Dgate, 0, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_0', 'regularize': True, 'monitor': False},
-        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_0', 'regularize': True, 'monitor': False}])
-    gates_structure.append([Dgate, 1, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_1', 'regularize': True, 'monitor': False},
-        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_1', 'regularize': True, 'monitor': False}])
-    gates_structure.append([Dgate, 2, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_2', 'regularize': True, 'monitor': False},
-        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_2', 'regularize': True, 'monitor': False}])
-    gates_structure.append([Dgate, 3, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_3', 'regularize': True, 'monitor': False},
-        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_3', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Sgate, 0, {"constant": np.random.random() - 0.5, "name": 's_magnitude_00', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_00', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Sgate, 1, {"constant": np.random.random() - 0.5, "name": 's_magnitude_01', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_01', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Sgate, 2, {"constant": np.random.random() - 0.5, "name": 's_magnitude_02', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_02', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Sgate, 3, {"constant": np.random.random() - 0.5, "name": 's_magnitude_03', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_03', 'regularize': True, 'monitor': False}])
     
+    gates_structure.append([Sgate, 0, {"constant": np.random.random() - 0.5, "name": 's_magnitude_10', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_10', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Sgate, 1, {"constant": np.random.random() - 0.5, "name": 's_magnitude_11', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_11', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Sgate, 2, {"constant": np.random.random() - 0.5, "name": 's_magnitude_12', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_12', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Sgate, 3, {"constant": np.random.random() - 0.5, "name": 's_magnitude_13', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 's_phase_13', 'regularize': True, 'monitor': False}])
+
+    gates_structure.append([Dgate, 0, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_00', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_00', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Dgate, 1, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_01', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_01', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Dgate, 2, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_02', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_02', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Dgate, 3, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_03', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_03', 'regularize': True, 'monitor': False}])
+    
+    gates_structure.append([Dgate, 0, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_10', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_10', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Dgate, 1, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_11', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_11', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Dgate, 2, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_12', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_12', 'regularize': True, 'monitor': False}])
+    gates_structure.append([Dgate, 3, {"constant": np.random.random() - 0.5, "name": 'd_magnitude_13', 'regularize': True, 'monitor': False},
+        {"constant": np.random.random()*2*np.pi, "name": 'd_phase_13', 'regularize': True, 'monitor': False}])
+
     if use_ng == 1:
-        gates_structure.append([Kgate, 0, {"constant": np.random.random() - 0.5, "name": 'kerr_0', 'regularize': True, 'monitor': False}])
-        gates_structure.append([Kgate, 1, {"constant": np.random.random() - 0.5, "name": 'kerr_1', 'regularize': True, 'monitor': False}])
-        gates_structure.append([Kgate, 2, {"constant": np.random.random() - 0.5, "name": 'kerr_2', 'regularize': True, 'monitor': False}])
-        gates_structure.append([Kgate, 3, {"constant": np.random.random() - 0.5, "name": 'kerr_3', 'regularize': True, 'monitor': False}])
+        gates_structure.append([Kgate, 0, {"constant": np.random.random() - 0.5, "name": 'kerr_00', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Kgate, 1, {"constant": np.random.random() - 0.5, "name": 'kerr_01', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Kgate, 2, {"constant": np.random.random() - 0.5, "name": 'kerr_02', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Kgate, 3, {"constant": np.random.random() - 0.5, "name": 'kerr_03', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Kgate, 0, {"constant": np.random.random() - 0.5, "name": 'kerr_10', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Kgate, 1, {"constant": np.random.random() - 0.5, "name": 'kerr_11', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Kgate, 2, {"constant": np.random.random() - 0.5, "name": 'kerr_12', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Kgate, 3, {"constant": np.random.random() - 0.5, "name": 'kerr_13', 'regularize': True, 'monitor': True}])
+
     elif use_ng == 2:
-        gates_structure.append([Vgate, 0, {"constant": np.random.random() - 0.5, "name": 'cubic_0', 'regularize': True, 'monitor': False}])
-        gates_structure.append([Vgate, 1, {"constant": np.random.random() - 0.5, "name": 'cubic_1', 'regularize': True, 'monitor': False}])
-        gates_structure.append([Vgate, 2, {"constant": np.random.random() - 0.5, "name": 'cubic_2', 'regularize': True, 'monitor': False}])
-        gates_structure.append([Vgate, 3, {"constant": np.random.random() - 0.5, "name": 'cubic_3', 'regularize': True, 'monitor': False}])
+        gates_structure.append([Vgate, 0, {"constant": np.random.random() - 0.5, "name": 'cubic_00', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Vgate, 1, {"constant": np.random.random() - 0.5, "name": 'cubic_01', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Vgate, 2, {"constant": np.random.random() - 0.5, "name": 'cubic_02', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Vgate, 3, {"constant": np.random.random() - 0.5, "name": 'cubic_03', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Vgate, 0, {"constant": np.random.random() - 0.5, "name": 'cubic_10', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Vgate, 1, {"constant": np.random.random() - 0.5, "name": 'cubic_11', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Vgate, 2, {"constant": np.random.random() - 0.5, "name": 'cubic_12', 'regularize': True, 'monitor': True}])
+        gates_structure.append([Vgate, 3, {"constant": np.random.random() - 0.5, "name": 'cubic_13', 'regularize': True, 'monitor': True}])
 
 
     print("Starting", run_id, 'ng', use_ng)

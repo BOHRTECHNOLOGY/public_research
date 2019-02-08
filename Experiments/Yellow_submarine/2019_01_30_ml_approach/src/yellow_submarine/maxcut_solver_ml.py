@@ -85,19 +85,26 @@ class MaxCutSolver():
 
     def build_circuit(self, adj_matrix):
         params_counter = 0
-        sgates = []
-        dgates = []
-        kgates = []
-        vgates = []
+        number_of_layers = 2
+        all_sgates = [[]] * number_of_layers
+        all_dgates = [[]] * number_of_layers
+        all_kgates = [[]] * number_of_layers
+        all_vgates = [[]] * number_of_layers
+
         for gate_structure in self.gates_structure:
+            current_layer = int(gate_structure[2]['name'].split('_')[-1][0])
             if gate_structure[0] is Sgate:
-                sgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])]))
+                current_gate = ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])])
+                all_sgates[current_layer].append(current_gate)
             if gate_structure[0] is Dgate:
-                dgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])]))
+                current_gate = ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])])
+                all_dgates[current_layer].append(current_gate)
             if gate_structure[0] is Kgate:
-                kgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])]))
+                current_gate = ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])])
+                all_kgates[current_layer].append(current_gate)
             if gate_structure[0] is Vgate:
-                vgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])]))
+                current_gate = ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])])
+                all_vgates[current_layer].append(current_gate)
 
 
         eng, q = sf.Engine(self.n_qumodes)
@@ -109,24 +116,29 @@ class MaxCutSolver():
                 Sgate(squeeze_value) | i
 
             Interferometer(U) | q
+            for layer in range(number_of_layers):
+                sgates = all_sgates[layer]
+                dgates = all_dgates[layer]
+                kgates = all_kgates[layer]
+                vgates = all_vgates[layer]
 
-            if len(sgates) != 0:
-                for gate in sgates:
-                    gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
+                if len(sgates) != 0:
+                    Interferometer(self.interferometer_matrix) | q
+                    for gate in sgates:
+                        gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
-                Interferometer(self.interferometer_matrix) | q
 
-            if len(dgates) != 0:
-                for gate in dgates:
-                    gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
+                if len(dgates) != 0:
+                    Interferometer(self.interferometer_matrix) | q
+                    for gate in dgates:
+                        gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
-                Interferometer(self.interferometer_matrix) | q
 
-            for gate in kgates:
-                gate.gate(gate.params[0]) | gate.qumodes
+                for gate in kgates:
+                    gate.gate(gate.params[0]) | gate.qumodes
 
-            for gate in vgates:
-                gate.gate(gate.params[0]) | gate.qumodes
+                for gate in vgates:
+                    gate.gate(gate.params[0]) | gate.qumodes
 
 
         circuit = {}
