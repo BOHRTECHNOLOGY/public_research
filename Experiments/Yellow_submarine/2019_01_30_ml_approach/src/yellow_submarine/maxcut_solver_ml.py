@@ -14,19 +14,27 @@ ParametrizedGate = namedtuple('ParametrizedGate', 'gate qumodes params')
 
 class MaxCutSolver():
     """This method allows to embed graphs as """
-    def __init__(self, learner_params, training_params, matrices, gates_structure, log=None):
+    def __init__(self, learner_params, training_params, adj_matrices, gates_structure, log=None):
         self.learner_params = learner_params
         self.learner_params['loss'] = self.loss_function
         self.learner_params['regularizer'] = self.regularizer
         self.training_params = training_params
         self.gates_structure = gates_structure
-        self.adj_matrix = matrices[0]
-        self.interferometer_matrix = matrices[1]
-        self.n_qumodes = self.adj_matrix.shape[0]
-        self.cost_array = self.prepare_cost_array()
+        self.adj_matrices = adj_matrices
+
+        interferometer_matrix = \
+        np.array(
+            [[1, -1, 1, -1],
+            [1, 1, 1, 1],
+            [-1, -1, 1, 1],
+            [1, -1, -1, 1]
+            ]) / 2
+        self.interferometer_matrix = interferometer_matrix
+
+        self.n_qumodes = self.adj_matrices[0].shape[0]
 
         self.learner_params['circuit'] = self.create_circuit_evaluator
-        self.learner = CircuitLearner(hyperparams=self.learner_params, model_dir=training_params['model_dir'])
+        self.learner = CircuitLearner(adj_matrices=self.adj_matrices, hyperparams=self.learner_params, model_dir=training_params['model_dir'])
         self.final_params = None
 
         if log is None:
@@ -34,7 +42,7 @@ class MaxCutSolver():
         else:
             self.log = log
 
-    def train_and_evaluate_circuit(self, verbose=False):
+    def train_and_evaluate_circuit(self, verbose=True):
         self.learner.train_circuit(steps=self.training_params['steps'], tensors_to_log=self.log)
         final_params = self.learner.get_circuit_parameters()
         
@@ -43,50 +51,64 @@ class MaxCutSolver():
                 print("Parameter {} has the final value {}.".format(name, value))
 
         for gate in self.gates_structure:
-            gate_name = gate[2]['name']
-            for param_name in final_params:
-                if gate_name in param_name:
-                    final_value = final_params[param_name]
-                    gate[2]['constant'] = final_value
-                    break
+            for gate_element_id in range(len(gate)):
+                if gate_element_id < 2:
+                    continue
+                gate_name = gate[gate_element_id]['name']
+                for param_name in final_params:
+                    if gate_name in param_name:
+                        final_value = final_params[param_name]
+                        gate[gate_element_id]['constant'] = final_value
+                        break
 
         self.final_params = final_params
         all_results = []
-        circuit_output = self.get_circuit_output()
-        cost_tensor = self.loss_function(circuit_output)
-        init = tf.global_variables_initializer()
-        with tf.Session() as sess:
-            sess.run(init)
-            circuit_output = sess.run(circuit_output)
-            cost_value = sess.run(cost_tensor)
-
-        if verbose:
-            print("Total cost:", cost_value)
-        return cost_value, circuit_output
+        circuit_outputs = []
+        cost_values = []
+        for adj_matrix in self.adj_matrices:
+            circuit_output = self.get_circuit_output(adj_matrix)
+            
+            cost_tensor = self.loss_function([circuit_output], [adj_matrix])
+            init = tf.global_variables_initializer()
+            with tf.Session() as sess:
+                sess.run(init)
+                circuit_output = sess.run(circuit_output)
+                cost_value = sess.run(cost_tensor)
+            circuit_outputs.append(circuit_output)
+            cost_values.append(cost_value)
+            if verbose:
+                print("Total cost:", cost_value)
+        return cost_values, circuit_outputs
  
-    def create_circuit_evaluator(self):
-        return self.get_circuit_output()
+    def create_circuit_evaluator(self, adj_matrix):
+        return self.get_circuit_output(adj_matrix)
 
-    def build_circuit(self):
+    def build_circuit(self, adj_matrix):
         params_counter = 0
-        sgates = []
-        dgates = []
-        kgates = []
-        vgates = []
+        number_of_layers = 2
+        all_sgates = [[]] * number_of_layers
+        all_dgates = [[]] * number_of_layers
+        all_kgates = [[]] * number_of_layers
+        all_vgates = [[]] * number_of_layers
+
         for gate_structure in self.gates_structure:
+            current_layer = int(gate_structure[2]['name'].split('_')[-1][0])
             if gate_structure[0] is Sgate:
-                sgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])]))
+                current_gate = ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])])
+                all_sgates[current_layer].append(current_gate)
             if gate_structure[0] is Dgate:
-                dgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])]))
+                current_gate = ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])])
+                all_dgates[current_layer].append(current_gate)
             if gate_structure[0] is Kgate:
-                kgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])]))
+                current_gate = ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])])
+                all_kgates[current_layer].append(current_gate)
             if gate_structure[0] is Vgate:
-                vgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])]))
+                current_gate = ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])])
+                all_vgates[current_layer].append(current_gate)
 
 
         eng, q = sf.Engine(self.n_qumodes)
-
-        rl, U = takagi(self.adj_matrix)
+        rl, U = takagi(adj_matrix)
         initial_squeezings = np.tanh(rl)
 
         with eng:
@@ -94,24 +116,29 @@ class MaxCutSolver():
                 Sgate(squeeze_value) | i
 
             Interferometer(U) | q
+            for layer in range(number_of_layers):
+                sgates = all_sgates[layer]
+                dgates = all_dgates[layer]
+                kgates = all_kgates[layer]
+                vgates = all_vgates[layer]
 
-            if len(sgates) != 0:
-                for gate in sgates:
-                    gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
+                if len(sgates) != 0:
+                    Interferometer(self.interferometer_matrix) | q
+                    for gate in sgates:
+                        gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
-                Interferometer(self.interferometer_matrix) | q
 
-            if len(dgates) != 0:
-                for gate in dgates:
-                    gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
+                if len(dgates) != 0:
+                    Interferometer(self.interferometer_matrix) | q
+                    for gate in dgates:
+                        gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
-                Interferometer(self.interferometer_matrix) | q
 
-            for gate in kgates:
-                gate.gate(gate.params[0]) | gate.qumodes
+                for gate in kgates:
+                    gate.gate(gate.params[0]) | gate.qumodes
 
-            for gate in vgates:
-                gate.gate(gate.params[0]) | gate.qumodes
+                for gate in vgates:
+                    gate.gate(gate.params[0]) | gate.qumodes
 
 
         circuit = {}
@@ -120,8 +147,8 @@ class MaxCutSolver():
 
         return circuit
 
-    def get_circuit_output(self, test=False):
-        circuit = self.build_circuit()
+    def get_circuit_output(self, adj_matrix, test=False):
+        circuit = self.build_circuit(adj_matrix)
         eng = circuit['eng']
         encoding = []
         state = eng.run('tf', cutoff_dim=self.training_params['cutoff_dim'], eval=False)
@@ -139,8 +166,14 @@ class MaxCutSolver():
 
         return circuit_output
 
-    def loss_function(self, circuit_output):
-        cost_tensor = tf.constant(self.cost_array, dtype=tf.float32, name='cost_tensor')
+    def loss_function(self, circuit_outputs, adj_matrices):
+        result = tf.constant(0, dtype=tf.float32)
+        for circuit_output, adj_matrix in zip(circuit_outputs, adj_matrices):
+            result = tf.add(result, self.single_loss_function(circuit_output, adj_matrix))
+        return result
+
+    def single_loss_function(self, circuit_output, adj_matrix):
+        cost_tensor = tf.constant(self.prepare_cost_array(adj_matrix), dtype=tf.float32, name='cost_tensor')
         weighted_cost_tensor = tf.multiply(cost_tensor, circuit_output)
         result = tf.reduce_sum(weighted_cost_tensor)
         result = tf.multiply(result, tf.constant(-1.0))
@@ -149,21 +182,23 @@ class MaxCutSolver():
     def regularizer(self, regularized_params):
         return tf.nn.l2_loss(regularized_params)
 
-    def calculate_cost_once(self, encoding):
-        cost_value = 0
-        for i in range(len(encoding)):
-            for j in range(len(encoding)):
-                cost_value += 0.5 * self.adj_matrix[i][j] * (encoding[i] - encoding[j])**2
-        return cost_value
-
-    def assess_all_solutions_clasically(self):
-        all_possible_solutions = list(itertools.product([0, 1], repeat=len(self.adj_matrix)))
-        for solution in all_possible_solutions:
-            print(solution, self.calculate_cost_once(solution))
-
-    def prepare_cost_array(self):
+    def prepare_cost_array(self, adj_matrix):
         cutoff = self.training_params['cutoff_dim']
         cost_array = np.zeros([cutoff] * self.n_qumodes)
         for indices in np.ndindex(cost_array.shape):
-            cost_array[indices] = self.calculate_cost_once(np.clip(indices,0,1))
+            cost_array[indices] = calculate_cost_once(np.clip(indices,0,1), adj_matrix)
         return cost_array
+
+
+def calculate_cost_once(encoding, adj_matrix):
+    cost_value = 0
+    for i in range(len(encoding)):
+        for j in range(len(encoding)):
+            cost_value += 0.5 * adj_matrix[i][j] * (encoding[i] - encoding[j])**2
+    return cost_value
+
+
+def assess_all_solutions_clasically(adj_matrix):
+    all_possible_solutions = list(itertools.product([0, 1], repeat=len(adj_matrix)))
+    for solution in all_possible_solutions:
+        print(solution, calculate_cost_once(solution, adj_matrix))
