@@ -45,11 +45,13 @@ def calculate_cost_for_encoding(A, encoding):
     return cost_value
 
 def main(run_id=0, learning_rate=0.1, regularization=1e-3):
-    c = 3
+    matrix_divisor = 3
+    c = 0
     A = np.array([[c, 1, 1, 0],
         [1, c, 1, 1],
         [1, 1, c, 1],
         [0, 1, 1, c]])
+    A = A / matrix_divisor
 
     interferometer_matrix = \
         np.array(
@@ -71,7 +73,7 @@ def main(run_id=0, learning_rate=0.1, regularization=1e-3):
         }
 
 
-    steps = 401
+    steps = 500
 
     training_params = {
         'steps': steps,

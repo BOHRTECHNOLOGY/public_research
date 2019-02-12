@@ -43,12 +43,15 @@ class MaxCutSolver():
                 print("Parameter {} has the final value {}.".format(name, value))
 
         for gate in self.gates_structure:
-            gate_name = gate[2]['name']
-            for param_name in final_params:
-                if gate_name in param_name:
-                    final_value = final_params[param_name]
-                    gate[2]['constant'] = final_value
-                    break
+            for gate_element_id in range(len(gate)):
+                if gate_element_id < 2:
+                    continue
+                gate_name = gate[gate_element_id]['name']
+                for param_name in final_params:
+                    if gate_name in param_name:
+                        final_value = final_params[param_name]
+                        gate[gate_element_id]['constant'] = final_value
+                        break
 
         self.final_params = final_params
         circuit_output = self.get_circuit_output()
@@ -97,6 +100,8 @@ class MaxCutSolver():
 
             Interferometer(U) | q
 
+            Interferometer(self.interferometer_matrix) | q
+
             for gate in sgates:
                 gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
@@ -104,8 +109,6 @@ class MaxCutSolver():
 
             for gate in dgates:
                 gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
-
-            Interferometer(self.interferometer_matrix) | q
 
             for gate in kgates:
                 gate.gate(gate.params[0]) | gate.qumodes

@@ -2,6 +2,11 @@
 
 ## Overview
 
+## WARNING!
+
+The results of this report are invalid due to the error in preparation of adjacency matrix. The matrix passed to Takagi decomposition should have eigenvalues between (-1, 1). However, in case of this research, some eigenvalues lied outside of this range. Some of the research has been replicated with the correct version, you can find it in `correct_report.md`.
+
+## WARNING!
 
 ## Code 
 
