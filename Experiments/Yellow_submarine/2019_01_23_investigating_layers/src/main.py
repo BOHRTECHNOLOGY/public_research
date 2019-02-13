@@ -47,11 +47,14 @@ def run_single_test(learner_params, training_params, matrices, gates_structure):
 
 
 def main(run_id=0, use_s=1, use_d=1, use_ng=1):
-    c = 3
+    matrix_divisor = 4
+    c = 0
     A = np.array([[c, 1, 1, 0],
         [1, c, 1, 1],
         [1, 1, c, 1],
         [0, 1, 1, c]])
+    A = A / matrix_divisor
+
 
     interferometer_matrix = \
         np.array(
@@ -73,7 +76,7 @@ def main(run_id=0, use_s=1, use_d=1, use_ng=1):
         }
 
     training_params = {
-        'steps': 400,
+        'steps': 300,
         'cutoff_dim': 17
         }
 
