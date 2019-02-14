@@ -96,16 +96,15 @@ class MaxCutSolver():
             Interferometer(U) | q
 
             if len(sgates) != 0:
+                Interferometer(self.interferometer_matrix) | q
                 for gate in sgates:
                     gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
-                Interferometer(self.interferometer_matrix) | q
-
             if len(dgates) != 0:
+                Interferometer(self.interferometer_matrix) | q
                 for gate in dgates:
                     gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
-                Interferometer(self.interferometer_matrix) | q
 
             for gate in kgates:
                 gate.gate(gate.params[0]) | gate.qumodes

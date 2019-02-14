@@ -38,7 +38,7 @@ Graphs can be found in the appendix at the end of this report.
 
 ### Observation 1
 
-For the 1st set of graphs some of the graphs had the same solutions. Hence, it was easy for the system to learn to output this solution regardless of the input matrix.
+For the 1st set of graphs some of the graphs had the same solutions. Hence, it was easy for the system to learn to output this solution regardless of the input matrix. 
 
 ### Observation 2
 
@@ -55,6 +55,20 @@ Unfortunately time needed to run the code on the hardware available to us increa
 ### Observation 5
 
 The output of the circuit was independent of the embedded graph.
+
+
+### Observation 6
+
+When used 2 layers, the parameters of the Kerr gates changed significantly during the training. Which is different 
+
+### Observation 7
+
+The best result has been achieved when no non-linear gates has been used - the cost function was lowest and the training was very smooth.
+The results with Cubic gates were slightly better than with Kerr gates when it comes to the value of the cost function. In both cases there are oscillations in the cost function (and also in the values of the parameters).
+
+![](figures/ng_0.png)
+![](figures/ng_1.png)
+![](figures/ng_2.png)
 
 ## Conclusions
 

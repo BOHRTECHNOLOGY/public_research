@@ -48,57 +48,40 @@ def run_single_test(learner_params, training_params, adj_matrices, gates_structu
 
 
 def main(run_id=0, use_ng=1):
-    c = 3
-    # Initial set of matrices used for training
-    # A_0 = np.array([[c, 1, 1, 1],
-    #     [1, c, 1, 1],
-    #     [1, 1, c, 1],
-    #     [1, 1, 1, c]])
-
-    # A_1 = np.array([[c, 1, 1, 0],
-    #     [1, c, 1, 1],
-    #     [1, 1, c, 1],
-    #     [0, 1, 1, c]])
-
-    # A_2 = np.array([[c, 0, 1, 0],
-    #     [0, c, 1, 1],
-    #     [1, 1, c, 1],
-    #     [0, 1, 1, c]])
-
-    # A_3 = np.array([[c, 1, 0, 0],
-    #     [1, c, 1, 0],
-    #     [0, 1, c, 1],
-    #     [0, 0, 1, c]])
-
+    c = 0
+    matrix_divisor = 3
     A_0 = np.array([[c, 1, 1, 1],
         [1, c, 0, 0],
         [1, 0, c, 0],
         [1, 0, 0, c]])
+    A_0 = A_0/matrix_divisor
 
     A_1 = np.array([[c, 1, 0, 0],
         [1, c, 1, 1],
         [0, 1, c, 0],
         [0, 1, 0, c]])
+    A_1 = A_1/matrix_divisor
 
     A_2 = np.array([[c, 0, 1, 0],
         [0, c, 1, 0],
         [1, 1, c, 1],
         [0, 0, 1, c]])
+    A_2 = A_2/matrix_divisor
 
     A_3 = np.array([[c, 0, 0, 1],
         [0, c, 0, 1],
         [0, 0, c, 1],
         [1, 1, 1, c]])
-
+    A_3 = A_3/matrix_divisor
 
 
     adj_matrices = [A_0, A_1, A_2, A_3]
 
     learner_params = {
         'task': 'optimization',
-        'regularization_strength': 1e-4,
+        'regularization_strength': 1e-3,
         'optimizer': 'SGD',
-        'init_learning_rate': 0.1,
+        'init_learning_rate': 0.25,
         'log_every': 1,
         'print_log': False
         }
