@@ -2,10 +2,11 @@
 import qiskit
 import numpy as np
 
+
 class QuantumKitchenSinks():
     """
     QKS
-    
+
     Parameters:
     qc : object, default = None
         the quantum computer object
@@ -24,7 +25,7 @@ class QuantumKitchenSinks():
         distribution used to create nonzero elements of omega
     n_trials : int, default 1000
         the number of times we run the quantujm circuit
-        
+
     References:
         Quantum Kitchen Sinks was introduced in:
         C. M. Wilson, J. S. Otterbach, N. Tezak, R. S. Smith,
@@ -43,9 +44,8 @@ class QuantumKitchenSinks():
         self.scale = scale
         self.distribution = distribution
         self.n_trials = n_trials
-        self.num_cols = self.n_episodes*self.q
+        self.num_cols = self.n_episodes * self.q
         self.executable = self._build_and_compile()
-
 
     def fit(self, X):
         """Generate set of random parameters for X
@@ -137,7 +137,7 @@ class QuantumKitchenSinks():
             var = 'theta'
 
             ro = program.declare('ro', memory_type='BIT', memory_size=n_qubits)
-            thetas = {var + str(qubit): program.declare(var + str(qubit), memory_type = 'REAL') for qubit in qubits}
+            thetas = {var + str(qubit): program.declare(var + str(qubit), memory_type='REAL') for qubit in qubits}
 
             sq = int(np.sqrt(n_qubits))
             lim = n_qubits - sq - 1
@@ -151,8 +151,10 @@ class QuantumKitchenSinks():
                 skip = (m_1) % sq
 
                 if m_1 < n_qubits:
-                    if (m_sq >= n_qubits): program += qiskit.circuit.cx(m, m_1)
-                    else: program += qiskit.circuit.cx(m, m_sq)
+                    if (m_sq >= n_qubits):
+                        program += qiskit.circuit.cx(m, m_1)
+                    else:
+                        program += qiskit.circuit.cx(m, m_sq)
 
                 if (m < lim) and (skip != 0): program += qiskit.circuit.cx(m, m_1)
 
@@ -176,5 +178,4 @@ class QuantumKitchenSinks():
         bitstrings = self.qc.run(self.executable, memory_map=theta_map)
         avg_measurements = bitstrings.mean(axis=0)
         return avg_measurements
- 
- 
+
