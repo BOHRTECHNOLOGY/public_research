@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from qks import QuantumKitchenSinks
 from make_frames import make_frames
 
+
 def logistic_regression(X_train, X_test, y_train, y_test):
     lr = LogisticRegression(solver='lbfgs')
     lr.fit(X_train, y_train)
@@ -23,6 +24,16 @@ def logistic_regression(X_train, X_test, y_train, y_test):
 
     return train_preds, test_preds
 
+
+def run_qks(p, number_of_qubits, qc, n_episodes, scale, n_trials):
+    r = 1 if p / number_of_qubits < 1 else int(p / q)
+    QKS = QuantumKitchenSinks(qc, n_episodes=n_episodes,
+                              r=r, scale=scale,
+                              distribution='normal',
+                              n_trials=n_trials)
+    return QKS
+
+
 def make_plot(data, target, name, title):
     plt.figure(figsize=(5, 5))
     plt.title(title)
@@ -32,9 +43,7 @@ def make_plot(data, target, name, title):
     qc = make_qc(q, noisy)
     p = X_train.shape[-1]
 
-    r = 1 if p / q < 1 else int(p / q)
-
-    QKS = QuantumKitchenSinks(qc, n_episodes=n_episodes, r=r, scale=scale, distribution='normal', n_trials=1000)
+    QKS = run_qks(p, 2, qc, 1000, 1, 1000)
 
     QKS_train = QKS.fit_transform(X_train)
     QKS_test = QKS.fit_transform(X_test)
@@ -59,9 +68,11 @@ def main():
     n_episodes = 20
     scale = 1
     n_trials = 1000
-    q = 2
+    number_of_qubits = 2
     noisy = False
+    qc = make_qc(q, noisy)
 
+    run_qks(p, number_of_qubits, qc, n_episodes, scale, n_trials)
 
 # Write the API token to IBM Q
 my_api_token = ""
@@ -75,6 +86,8 @@ except:
     print("""WARNING: There's no connection with the API for remote backends.
              Have you initialized a file with your personal token?
              For now, there's only access to local simulator backends...""")
+
+main()
 
 if __name__ == "__main__":
     np.random.seed(1337)

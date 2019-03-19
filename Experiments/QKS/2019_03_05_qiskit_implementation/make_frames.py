@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def make_frames(train_size=200, test_size=50, outer_length=2, inner_length=1):
     """
     Generates pictures frames dataset.
