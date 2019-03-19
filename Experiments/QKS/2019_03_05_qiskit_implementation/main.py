@@ -26,7 +26,7 @@ def logistic_regression(X_train, X_test, y_train, y_test):
 
 
 def run_qks(p, number_of_qubits, qc, n_episodes, scale, n_trials):
-    r = 1 if p / number_of_qubits < 1 else int(p / q)
+    r = 1 if p / number_of_qubits < 1 else int(p / number_of_qubits)
     QKS = QuantumKitchenSinks(qc, n_episodes=n_episodes,
                               r=r, scale=scale,
                               distribution='normal',
