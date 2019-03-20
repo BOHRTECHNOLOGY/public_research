@@ -26,6 +26,31 @@ def logistic_regression(X_train, X_test, y_train, y_test):
 
 
 def run_qks(p, number_of_qubits, qc, n_episodes, scale, n_trials):
+    """
+    Parameters:
+    p : int, default = None
+        dimension of input vector, inferred from dataset
+    qc : object, default = None
+        the quantum computer object
+    n_episodes : int, default = 1
+        number of episodes the dataset is iterated over;
+        (i.e. for each sampe in the dataset, we apply the QKS transformation n_episodes number of times)
+    scale : int, default = 1
+        standard deviation (spread) of the normal distribution
+    n_trials : int, default 1000
+        the number of times we run the quantujm circuit
+
+    r : int, default = 1
+        number of elements that are non-zero s.t. r <= p (dimension of input vector)
+
+    References:
+        Quantum Kitchen Sinks was introduced in:
+        C. M. Wilson, J. S. Otterbach, N. Tezak, R. S. Smith,
+        G. E. Crooks, and M. P. da Silva 2018. Quantum Kitchen
+        Sinks. An algorithm for machine learning on near-term
+        quantum computers. <https://arxiv.org/pdf/1806.08321.pdf>
+    """
+
     r = 1 if p / number_of_qubits < 1 else int(p / number_of_qubits)
     QKS = QuantumKitchenSinks(qc, n_episodes=n_episodes,
                               r=r, scale=scale,
@@ -86,8 +111,6 @@ except:
     print("""WARNING: There's no connection with the API for remote backends.
              Have you initialized a file with your personal token?
              For now, there's only access to local simulator backends...""")
-
-main()
 
 if __name__ == "__main__":
     np.random.seed(1337)
