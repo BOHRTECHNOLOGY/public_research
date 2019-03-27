@@ -66,9 +66,9 @@ When used 2 layers, the parameters of the Kerr gates changed significantly durin
 The best result has been achieved when no non-linear gates has been used - the cost function was lowest and the training was very smooth.
 The results with Cubic gates were slightly better than with Kerr gates when it comes to the value of the cost function. In both cases there are oscillations in the cost function (and also in the values of the parameters).
 
-![](figures/ng_0.png)
-![](figures/ng_1.png)
-![](figures/ng_2.png)
+![](figures/old/ng_0.png)
+![](figures/old/ng_1.png)
+![](figures/old/ng_2.png)
 
 ## Conclusions
 

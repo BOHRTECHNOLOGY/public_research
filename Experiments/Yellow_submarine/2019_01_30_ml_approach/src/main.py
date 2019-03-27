@@ -88,7 +88,7 @@ def main(run_id=0, use_ng=1):
 
     training_params = {
         'steps': 400,
-        'cutoff_dim': 15
+        'cutoff_dim': 13
         }
 
     gates_structure = []

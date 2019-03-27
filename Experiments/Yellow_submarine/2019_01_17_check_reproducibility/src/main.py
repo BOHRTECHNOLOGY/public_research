@@ -55,7 +55,7 @@ def main(run_id=0):
         'task': 'optimization',
         'regularization_strength': 2e-3,
         'optimizer': 'SGD',
-        'init_learning_rate': 1.0,
+        'init_learning_rate': 0.1,
         'log_every': 1,
         'print_log': False
         }

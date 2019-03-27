@@ -68,9 +68,9 @@ def main(run_id=0, use_s=1, use_d=1, use_ng=1):
 
     learner_params = {
         'task': 'optimization',
-        'regularization_strength': 1e-4,
+        'regularization_strength': 1e-3,
         'optimizer': 'SGD',
-        'init_learning_rate': 0.1,
+        'init_learning_rate': 0.25,
         'log_every': 1,
         'print_log': False
         }
