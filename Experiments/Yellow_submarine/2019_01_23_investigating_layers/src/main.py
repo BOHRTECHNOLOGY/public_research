@@ -46,15 +46,15 @@ def run_single_test(learner_params, training_params, matrices, gates_structure):
     return final_cost, all_probs
 
 
-def main(run_id = 0, use_s = 1, use_d = 1, use_ng = 1):
-    # adjacency_matrix = np.array([
-    #     [ 0,  1,  1,  1,  1,  0],
-    #     [ 1,  0,  1,  1,  1,  1],
-    #     [ 1,  1,  0,  1,  1,  1],
-    #     [ 1,  1,  1,  0,  1,  1],
-    #     [ 1,  1,  1,  1,  0,  1],
-    #     [ 0,  1,  1,  1,  1,  1],
-    # ]) / 5
+def main(run_id=0, use_s=1, use_d=1, use_ng=1):
+    matrix_divisor = 4
+    c = 0
+    A = np.array([[c, 1, 1, 0],
+        [1, c, 1, 1],
+        [1, 1, c, 1],
+        [0, 1, 1, c]])
+    A = A / matrix_divisor
+
 
     # interferometer_matrix = np.array([
     #     [ 1,  0,  0,  0,  0,  0],
@@ -88,16 +88,16 @@ def main(run_id = 0, use_s = 1, use_d = 1, use_ng = 1):
         'task': 'optimization',
         'regularization_strength': 1e-3,
         'optimizer': 'SGD',
-        'init_learning_rate': 0.1,
+        'init_learning_rate': 0.25,
         'log_every': 1,
         'print_log': False
     }
 
     # Training parameters
     training_params = {
-        'steps': 400,
-        'cutoff_dim': 11
-    }
+        'steps': 300,
+        'cutoff_dim': 17
+        }
 
     # Gate structures
     gates_structure = []

@@ -11,7 +11,7 @@ The synthetic "picture frames" dataset proposed in the paper was generated via t
 
 picture frames             |  picture frames
 :-------------------------:|:-------------------------:
-![training set](https://github.com/zackgow/public_research/raw/quantum_kitchen_sinks/Experiments/forest_QKS/figs/training_dataset.png) |  ![test set](https://github.com/zackgow/public_research/raw/quantum_kitchen_sinks/Experiments/forest_QKS/figs/test_dataset.png)
+![training set](https://github.com/BOHRTECHNOLOGY/public_research/raw/master/Experiments/forest_QKS/2019_01_08_initial_implementation/figs/training_dataset.png) |  ![test set](https://github.com/BOHRTECHNOLOGY/public_research/raw/master/Experiments/forest_QKS/2019_01_08_initial_implementation/figs/test_dataset.png)
 
 ## Results
 Using the parameters below, we were able to achieve an accuracy of **99.5%** on the training set and **99.75%** on the test set using logistic regression after obtaining the feature vector from the Quantum Kitchen Sinks method. 
@@ -36,7 +36,7 @@ Using the parameters below, we were able to achieve an accuracy of **99.5%** on 
 
 picture frames             |  picture frames
 :-------------------------:|:-------------------------:
-![experiment on training set](https://github.com/zackgow/public_research/raw/quantum_kitchen_sinks/Experiments/forest_QKS/figs/results_experiment_train.png)|  ![experiment on test set](https://github.com/zackgow/public_research/raw/quantum_kitchen_sinks/Experiments/forest_QKS/figs/results_experiment_test.png)
+![experiment on training set](https://github.com/BOHRTECHNOLOGY/public_research/raw/master/Experiments/forest_QKS/2019_01_08_initial_implementation/figs/results_experiment_train.png)|  ![experiment on test set](https://github.com/BOHRTECHNOLOGY/public_research/raw/master/Experiments/forest_QKS/2019_01_08_initial_implementation/figs/results_experiment_test.png)
 
 
 ## Conclusion

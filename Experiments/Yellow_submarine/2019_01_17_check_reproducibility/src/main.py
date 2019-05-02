@@ -32,21 +32,22 @@ def run_single_test(learner_params, training_params, matrices, gates_structure):
     return final_cost, all_probs
 
 
-def main(run_id = 0):
-    c = 3
-    A = np.array([
-        [ c,  1,  1,  0],
-        [ 1,  c,  1,  1],
-        [ 1,  1,  c,  1],
-        [ 0,  1,  1,  c],
-    ])
+def main(run_id=0):
+    c = 0
+    matrix_divisor = 3
+    A = np.array([[c, 1, 1, 0],
+        [1, c, 1, 1],
+        [1, 1, c, 1],
+        [0, 1, 1, c]])
+    A = A / matrix_divisor
 
-    interferometer_matrix = np.array([
-        [ 1, -1,  1, -1],
-        [ 1,  1,  1,  1],
-        [-1, -1,  1,  1],
-        [ 1, -1, -1,  1],
-    ]) / 2
+    interferometer_matrix = \
+        np.array(
+            [[1, -1, 1, -1],
+            [1, 1, 1, 1],
+            [-1, -1, 1, 1],
+            [1, -1, -1, 1]
+            ]) / 2
 
     matrices = [A, interferometer_matrix]
 

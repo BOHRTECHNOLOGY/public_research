@@ -83,7 +83,7 @@ class MaxCutSolver():
         eng, q = sf.Engine(self.n_qumodes)
 
         rl, U = takagi(self.adj_matrix)
-        initial_squeezings = np.tanh(rl)
+        initial_squeezings = np.arctanh(rl)
 
         with eng:
             for i, squeeze_value in enumerate(initial_squeezings):

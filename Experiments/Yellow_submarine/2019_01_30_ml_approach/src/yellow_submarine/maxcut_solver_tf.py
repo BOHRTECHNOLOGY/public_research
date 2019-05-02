@@ -43,32 +43,23 @@ class MaxCutSolver():
                 print("Parameter {} has the final value {}.".format(name, value))
 
         for gate in self.gates_structure:
-            for gate_element_id in range(len(gate)):
-                if gate_element_id < 2:
-                    continue
-                gate_name = gate[gate_element_id]['name']
-                for param_name in final_params:
-                    if gate_name in param_name:
-                        final_value = final_params[param_name]
-                        gate[gate_element_id]['constant'] = final_value
-                        break
+            gate_name = gate[2]['name']
+            for param_name in final_params:
+                if gate_name in param_name:
+                    final_value = final_params[param_name]
+                    gate[2]['constant'] = final_value
+                    break
 
         self.final_params = final_params
+        all_results = []
         circuit_output = self.get_circuit_output()
         cost_tensor = self.loss_function(circuit_output)
         init = tf.global_variables_initializer()
-        
         with tf.Session() as sess:
             sess.run(init)
-            for variable in tf.all_variables():
-                variable_name = variable.name.split(':')[0]
-                if variable_name in final_params.keys():
-                    value = final_params[variable_name]
-                    sess.run(variable.assign(value))
             circuit_output = sess.run(circuit_output)
             cost_value = sess.run(cost_tensor)
-            a_variable = sess.run(tf.all_variables()[0])
-        
+
         if verbose:
             print("Total cost:", cost_value)
         return cost_value, circuit_output
@@ -81,6 +72,7 @@ class MaxCutSolver():
         sgates = []
         dgates = []
         kgates = []
+        vgates = []
         for gate_structure in self.gates_structure:
             if gate_structure[0] is Sgate:
                 sgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])]))
@@ -88,11 +80,14 @@ class MaxCutSolver():
                 dgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2]), make_param(**gate_structure[3])]))
             if gate_structure[0] is Kgate:
                 kgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])]))
+            if gate_structure[0] is Vgate:
+                vgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])]))
+
 
         eng, q = sf.Engine(self.n_qumodes)
 
         rl, U = takagi(self.adj_matrix)
-        initial_squeezings = np.arctanh(rl)
+        initial_squeezings = np.tanh(rl)
 
         with eng:
             for i ,squeeze_value in enumerate(initial_squeezings):
@@ -100,18 +95,23 @@ class MaxCutSolver():
 
             Interferometer(U) | q
 
-            Interferometer(self.interferometer_matrix) | q
+            if len(sgates) != 0:
+                Interferometer(self.interferometer_matrix) | q
+                for gate in sgates:
+                    gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
-            for gate in sgates:
-                gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
+            if len(dgates) != 0:
+                Interferometer(self.interferometer_matrix) | q
+                for gate in dgates:
+                    gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
-            Interferometer(self.interferometer_matrix) | q
-
-            for gate in dgates:
-                gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
             for gate in kgates:
                 gate.gate(gate.params[0]) | gate.qumodes
+
+            for gate in vgates:
+                gate.gate(gate.params[0]) | gate.qumodes
+
 
         circuit = {}
         circuit['eng'] = eng

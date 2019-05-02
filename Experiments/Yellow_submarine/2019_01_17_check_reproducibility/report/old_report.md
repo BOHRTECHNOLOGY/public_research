@@ -6,6 +6,12 @@ The main goal of this research was to check how similar are consecutive runs of 
 
 This was also an opportunity to do some initial tests on what are the reasonable values of the algorithm parameters.
 
+## WARNING!
+
+The results of this report are invalid due to the error in preparation of adjacency matrix. The matrix passed to Takagi decomposition should have eigenvalues between (-1, 1). However, in case of this research, some eigenvalues lied outside of this range. Some of the research has been replicated with the correct version, you can find it in `correct_report.md`.
+
+## WARNING!
+
 ## Code 
 
 The main `yellow_submarine` engine comes from https://github.com/BOHRTECHNOLOGY/yellow_submarine, commit hash: `e4d4c16454af4d60843333f3cba8f7e98fa83381`.
@@ -76,7 +82,6 @@ At first we performed simulations using only one parameter, then we added also a
 ## Results 
 
 Unfortunately the files generated during the training process are too big to store them in the repository and we have not found a way to export the results from Tensorboard without a huge manual overhead.
-Hence, to see the exact results of the training 
 
 
 ### Observation 1
