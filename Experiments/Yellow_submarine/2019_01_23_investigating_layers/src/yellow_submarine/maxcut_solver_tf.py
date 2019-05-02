@@ -83,36 +83,34 @@ class MaxCutSolver():
             if gate_structure[0] is Vgate:
                 vgates.append(ParametrizedGate(gate_structure[0], gate_structure[1], [make_param(**gate_structure[2])]))
 
-
         eng, q = sf.Engine(self.n_qumodes)
 
         rl, U = takagi(self.adj_matrix)
         initial_squeezings = np.tanh(rl)
 
         with eng:
+            Interferometer(U) | q
+
             for i ,squeeze_value in enumerate(initial_squeezings):
                 Sgate(squeeze_value) | i
 
-            Interferometer(U) | q
-
             if len(sgates) != 0:
+                Interferometer(self.interferometer_matrix) | q
+
                 for gate in sgates:
                     gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
 
+            if len(dgates) != 0:
                 Interferometer(self.interferometer_matrix) | q
 
-            if len(dgates) != 0:
                 for gate in dgates:
                     gate.gate(gate.params[0], gate.params[1]) | gate.qumodes
-
-                Interferometer(self.interferometer_matrix) | q
 
             for gate in kgates:
                 gate.gate(gate.params[0]) | gate.qumodes
 
             for gate in vgates:
                 gate.gate(gate.params[0]) | gate.qumodes
-
 
         circuit = {}
         circuit['eng'] = eng
