@@ -1,0 +1,6 @@
+vrp_venv/*
+*.pyc
+src/*_credentials.txt
+*_credentials.txt
+*.swp
+*~

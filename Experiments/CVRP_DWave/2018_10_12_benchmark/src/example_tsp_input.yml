@@ -1,0 +1,12 @@
+# Example configuration file for TSP benchmark
+
+num_graphs: 10
+num_nodes: 5
+num_tries: 2
+edges_magnitude: 1
+dwave_config:
+  chain_strength: 200
+  cost_constant: 10
+  constraint_constant: 30
+ortools_config:
+  calculation_time: 15
