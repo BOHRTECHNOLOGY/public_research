@@ -13,4 +13,4 @@ The repository consists of the following directories:
 
 ## Contribution
 
-If you would like to contribute make sure you read the guidelines. Also, it might be a good idea to contact ms@bohr.technology beforehand.
+If you would like to contribute make sure you read the guidelines. Also, it might be a good idea to contact michal.stechly@gmail.com beforehand.
