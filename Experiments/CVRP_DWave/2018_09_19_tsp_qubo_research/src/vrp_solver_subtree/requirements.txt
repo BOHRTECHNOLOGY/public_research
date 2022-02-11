@@ -6,7 +6,7 @@ networkx==2.1
 numpy==1.15.1
 ortools==6.7.4973
 pandas==0.23.4
-protobuf==3.6.1
+protobuf==3.15.0
 pyparsing==2.2.0
 python-dateutil==2.7.3
 pytz==2018.5
