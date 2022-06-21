@@ -4,7 +4,7 @@ qiskit-aer==0.1.1
 psutil==5.5.1
 networkx==2.2
 pillow==5.4.1
-numpy==1.15.4
+numpy==1.22.0
 ply==3.11
 requests==2.21.0
 scipy==1.2.1
