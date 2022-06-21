@@ -11,7 +11,7 @@ kiwisolver==1.0.1
 matplotlib==2.2.3
 msgpack==0.6.0
 networkx==2.2
-numpy==1.15.1
+numpy==1.22.0
 pyparsing==2.3.0
 pyquil==2.1.1
 python-dateutil==2.7.3
