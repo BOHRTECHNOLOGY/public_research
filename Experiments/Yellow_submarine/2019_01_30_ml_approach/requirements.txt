@@ -11,7 +11,7 @@ Markdown==3.0.1
 matplotlib==3.0.2
 networkx==2.2
 numpy==1.16.0
-protobuf==3.6.1
+protobuf==3.18.3
 pyparsing==2.3.1
 python-dateutil==2.7.5
 qmlt==0.7.1
